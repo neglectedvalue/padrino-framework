@@ -74,7 +74,7 @@ if PadrinoTasks.load?(:activerecord, defined?(ActiveRecord))
             $stderr.puts "Couldn't create database for #{config.inspect}, charset: #{config[:charset] || @charset}, collation: #{config[:collation] || @collation}"
             $stderr.puts "(if you set the charset manually, make sure you have a matching collation)" if config[:charset]
           end
-        when 'postgresql'
+        when 'postgresql', 'em_postgresql'
           @encoding = config[:encoding] || ENV['CHARSET'] || 'utf8'
           begin
             ActiveRecord::Base.establish_connection(config.merge(:database => 'postgres', :schema_search_path => 'public'))
@@ -192,7 +192,7 @@ if PadrinoTasks.load?(:activerecord, defined?(ActiveRecord))
       when 'mysql', 'mysql2', 'jdbcmysql'
         ActiveRecord::Base.establish_connection(config)
         puts ActiveRecord::Base.connection.charset
-      when 'postgresql'
+      when 'postgresql', 'em_postgresql'
         ActiveRecord::Base.establish_connection(config)
         puts ActiveRecord::Base.connection.encoding
       else
@@ -264,7 +264,7 @@ if PadrinoTasks.load?(:activerecord, defined?(ActiveRecord))
         when "mysql", "mysql2", "oci", "oracle", 'jdbcmysql'
           ActiveRecord::Base.establish_connection(abcs[Padrino.env])
           File.open("#{Padrino.root}/db/#{Padrino.env}_structure.sql", "w+") { |f| f << ActiveRecord::Base.connection.structure_dump }
-        when "postgresql"
+        when "postgresql", "em_postgresql"
           ENV['PGHOST']     = abcs[Padrino.env][:host] if abcs[Padrino.env][:host]
           ENV['PGPORT']     = abcs[Padrino.env][:port].to_s if abcs[Padrino.env][:port]
           ENV['PGPASSWORD'] = abcs[Padrino.env][:password].to_s if abcs[Padrino.env][:password]
@@ -349,7 +349,7 @@ if PadrinoTasks.load?(:activerecord, defined?(ActiveRecord))
       file = path.absolute? ? path.to_s : Padrino.root(path)
 
       FileUtils.rm(file)
-    when 'postgresql'
+    when 'postgresql', 'em_postgresql'
       ActiveRecord::Base.establish_connection(config.merge(:database => 'postgres', :schema_search_path => 'public'))
       ActiveRecord::Base.connection.drop_database config[:database]
     end
