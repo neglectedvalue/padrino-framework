@@ -65,8 +65,9 @@ module Padrino
       # Generate the logging methods for {Padrino.logger} for each log level.
       #
       Padrino::Logger::Levels.each_pair do |name, number|
-        define_method(name) do |*args|
+        define_method(name) do |*args, &block|
           return if number < level
+          args = Array.wrap(block.call) if block
           if args.size > 1
             bench(args[0], args[1], args[2], name)
           else
@@ -405,6 +406,9 @@ module Padrino
         status, header, body = @app.call(env)
         log(env, status, header, began_at) if logger.debug?
         [status, header, body]
+      rescue Exception => e
+        Padrino.logger.error ["#{e.class} - #{e.message}", *e.backtrace].join("\n\t")
+        raise e
       end
 
       private
