@@ -538,6 +538,7 @@ module Padrino
         url[0,0] = conform_uri(uri_root) if defined?(uri_root)
         url[0,0] = conform_uri(ENV['RACK_BASE_URI']) if ENV['RACK_BASE_URI']
         url = "/" if url.blank?
+        url = URI.decode(url)
         url
       rescue HttpRouter::InvalidRouteException
         route_error = "route mapping for url(#{name.inspect}) could not be found!"
@@ -566,7 +567,7 @@ module Padrino
                 memo
               end
             when nil then nil
-            else value.respond_to?(:to_param) ? value.to_param : value
+            else Rack::Utils.escape(value)
           end
         end
 
